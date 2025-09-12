@@ -10,7 +10,7 @@ contract UniswapV3PoolTest is Test {
     ERC20Mintable token1;
     UniswapV3Pool pool;
 
-        bool transferInMintCallback = true;
+    bool transferInMintCallback = true;
     bool transferInSwapCallback = true;
 
     struct TestCaseParams {
@@ -130,24 +130,21 @@ contract UniswapV3PoolTest is Test {
         pool = new UniswapV3Pool(address(token0), address(token1), params.currentSqrtP, params.currentTick);
 
         if (params.mintLiqudity) {
-            
-                        token0.approve(address(this), params.wethBalance);
+            token0.approve(address(this), params.wethBalance);
             token1.approve(address(this), params.usdcBalance);
-                        UniswapV3Pool.CallbackData memory extra = UniswapV3Pool
-                .CallbackData({
-                    token0: address(token0),
-                    token1: address(token1),
-                    payer: address(this)
-                });
+            UniswapV3Pool.CallbackData memory extra =
+                UniswapV3Pool.CallbackData({token0: address(token0), token1: address(token1), payer: address(this)});
             (poolBalance0, poolBalance1) =
                 pool.mint(address(this), params.lowerTick, params.upperTick, params.liquidity, abi.encode(extra));
         }
     }
 
-    function uniswapV3MintCallback(uint256 amount0, uint256 amount1) public {
-        if (transferInSwapCallback) {
-            token0.transfer(msg.sender, amount0);
-            token1.transfer(msg.sender, amount1);
+    function uniswapV3MintCallback(uint256 amount0, uint256 amount1, bytes calldata data) public {
+        if (transferInMintCallback) {
+            UniswapV3Pool.CallbackData memory extra = abi.decode(data, (UniswapV3Pool.CallbackData));
+
+            IERC20(extra.token0).transferFrom(extra.payer, msg.sender, amount0);
+            IERC20(extra.token1).transferFrom(extra.payer, msg.sender, amount1);
         }
     }
 

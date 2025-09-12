@@ -27,7 +27,7 @@ contract UniswapV3Pool {
         uint256 amount1
     );
 
-        event Swap(
+    event Swap(
         address indexed sender,
         address indexed recipient,
         int256 amount0,
@@ -52,7 +52,7 @@ contract UniswapV3Pool {
         int24 tick;
     }
 
-        struct CallbackData {
+    struct CallbackData {
         address token0;
         address token1;
         address payer;
